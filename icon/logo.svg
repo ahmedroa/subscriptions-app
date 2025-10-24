@@ -1,0 +1,73 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1F2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="bellGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#818CF8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366F1;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Rounded rectangle background -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGradient)"/>
+  
+  <!-- Circular accent rings -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#6366F1" stroke-width="2" opacity="0.15"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#6366F1" stroke-width="2" opacity="0.25"/>
+  
+  <!-- Subscription dots around (representing recurring payments) -->
+  <circle cx="256" cy="96" r="6" fill="#6366F1" opacity="0.6"/>
+  <circle cx="416" cy="256" r="6" fill="#6366F1" opacity="0.6"/>
+  <circle cx="256" cy="416" r="6" fill="#6366F1" opacity="0.6"/>
+  <circle cx="96" cy="256" r="6" fill="#6366F1" opacity="0.6"/>
+  
+  <!-- Main bell icon -->
+  <g filter="url(#shadow)">
+    <!-- Bell body -->
+    <path d="M256 140 C220 140 190 170 190 206 L190 256 C190 270 185 284 175 294 L170 300 L342 300 L337 294 C327 284 322 270 322 256 L322 206 C322 170 292 140 256 140 Z" 
+          fill="url(#bellGradient)"/>
+    
+    <!-- Bell top knob -->
+    <circle cx="256" cy="140" r="12" fill="#818CF8"/>
+    <rect x="251" y="120" width="10" height="20" rx="5" fill="#818CF8"/>
+    
+    <!-- Bell bottom clapper -->
+    <ellipse cx="256" cy="310" rx="35" ry="18" fill="url(#bellGradient)"/>
+    
+    <!-- Notification badge -->
+    <circle cx="330" cy="170" r="32" fill="#EF4444"/>
+    <circle cx="330" cy="170" r="28" fill="#DC2626"/>
+    
+    <!-- Currency symbol in badge -->
+    <text x="330" y="185" font-family="Arial, sans-serif" font-size="32" font-weight="bold" 
+          fill="white" text-anchor="middle">﷼</text>
+  </g>
+  
+  <!-- Bell sound waves -->
+  <path d="M 340 200 Q 365 200 380 215" stroke="#6366F1" stroke-width="6" 
+        stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M 350 180 Q 385 180 410 205" stroke="#6366F1" stroke-width="5" 
+        stroke-linecap="round" fill="none" opacity="0.5"/>
+  
+  <path d="M 172 200 Q 147 200 132 215" stroke="#6366F1" stroke-width="6" 
+        stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M 162 180 Q 127 180 102 205" stroke="#6366F1" stroke-width="5" 
+        stroke-linecap="round" fill="none" opacity="0.5"/>
+</svg>
