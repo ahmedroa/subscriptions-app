@@ -24,19 +24,28 @@ class NotificationService {
 
   static Future<void> requestPermissions() async {
     try {
+      print('🔐 Requesting notification permissions...');
+
       // طلب صلاحيات الإشعارات لـ Android
       final androidResult = await _notifications
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
-      print('Android permissions result: $androidResult');
+      print('📱 Android permissions result: $androidResult');
 
       // طلب صلاحيات الإشعارات لـ iOS
       final iosResult = await _notifications
           .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(alert: true, badge: true, sound: true);
-      print('iOS permissions result: $iosResult');
+      print('🍎 iOS permissions result: $iosResult');
+
+      // التحقق من النتائج
+      if (androidResult == true || iosResult == true) {
+        print('✅ Permissions granted successfully');
+      } else {
+        print('⚠️ Permissions may not be granted');
+      }
     } catch (e) {
-      print('Error requesting permissions: $e');
+      print('❌ Error requesting permissions: $e');
     }
   }
 
@@ -198,42 +207,60 @@ class NotificationService {
   }
 
   static Future<void> showTestNotification() async {
-    print('Starting test notification...');
+    print('🔔 Starting test notification...');
 
-    // طلب الصلاحيات أولاً
-    await requestPermissions();
-    print('Permissions requested');
+    try {
+      // طلب الصلاحيات أولاً
+      print('🔐 Requesting permissions...');
+      await requestPermissions();
+      print('✅ Permissions requested');
 
-    // إنشاء قناة إشعارات لـ Android
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'test_channel',
-      'اختبار الإشعارات',
-      channelDescription: 'قناة اختبار الإشعارات',
-      importance: Importance.max,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      enableVibration: true,
-      playSound: true,
-    );
+      // التحقق من حالة الإشعارات
+      final isEnabled = await areNotificationsEnabled();
+      print('📱 Notifications enabled: $isEnabled');
 
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      sound: 'default',
-    );
+      if (!isEnabled) {
+        print('❌ Notifications are disabled!');
+        return;
+      }
 
-    const NotificationDetails details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+      // إنشاء قناة إشعارات لـ Android
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'test_channel',
+        'اختبار الإشعارات',
+        channelDescription: 'قناة اختبار الإشعارات',
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+        enableVibration: true,
+        playSound: true,
+        showWhen: true,
+        when: null,
+      );
 
-    // إظهار الإشعار فوراً
-    await _notifications.show(
-      999, // ID فريد للاختبار
-      'اختبار الإشعارات',
-      'إذا رأيت هذا الإشعار، فالإشعارات تعمل بشكل صحيح!',
-      details,
-    );
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'default',
+        badgeNumber: 1,
+      );
 
-    print('Test notification sent successfully');
+      const NotificationDetails details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+      // إظهار الإشعار فوراً
+      print('📤 Sending notification...');
+      await _notifications.show(
+        999, // ID فريد للاختبار
+        '🔔 اختبار الإشعارات',
+        'إذا رأيت هذا الإشعار، فالإشعارات تعمل بشكل صحيح! ✅',
+        details,
+      );
+
+      print('✅ Test notification sent successfully');
+    } catch (e) {
+      print('❌ Error sending test notification: $e');
+    }
   }
 
   static Future<void> showSimpleNotification() async {
@@ -362,5 +389,107 @@ class NotificationService {
 
   static tz.TZDateTime _convertToTZDateTime(DateTime dateTime) {
     return tz.TZDateTime.from(dateTime, tz.getLocation('Asia/Riyadh'));
+  }
+
+  // دالة تشخيص شاملة لحل مشاكل الإشعارات
+  static Future<void> diagnoseNotificationIssues() async {
+    print('🔍 === تشخيص مشاكل الإشعارات ===');
+
+    try {
+      // 1. التحقق من التهيئة
+      print('1️⃣ Checking initialization...');
+      // محاولة إرسال إشعار بسيط
+      await _notifications.show(888, 'اختبار التهيئة', 'اختبار بسيط للتحقق من التهيئة', const NotificationDetails());
+      print('✅ Basic notification sent');
+
+      // 2. التحقق من الصلاحيات
+      print('2️⃣ Checking permissions...');
+      final androidEnabled = await _notifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.areNotificationsEnabled();
+      print('📱 Android notifications enabled: $androidEnabled');
+
+      final iosPermissions = await _notifications
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          ?.checkPermissions();
+      print('🍎 iOS permissions: $iosPermissions');
+
+      // 3. اختبار الإشعارات المعلقة
+      print('3️⃣ Checking pending notifications...');
+      final pending = await _notifications.pendingNotificationRequests();
+      print('📋 Pending notifications count: ${pending.length}');
+
+      // 4. اختبار الإشعارات النشطة (Android فقط)
+      print('4️⃣ Checking active notifications...');
+      try {
+        final active = await _notifications.getActiveNotifications();
+        print('🔔 Active notifications count: ${active.length}');
+      } catch (e) {
+        print('⚠️ Active notifications not supported: $e');
+      }
+
+      // 5. اختبار إشعار مع تفاصيل كاملة
+      print('5️⃣ Testing full notification...');
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'diagnostic_channel',
+        'قناة التشخيص',
+        channelDescription: 'قناة لاختبار الإشعارات',
+        importance: Importance.max,
+        priority: Priority.max,
+        icon: '@mipmap/ic_launcher',
+        enableVibration: true,
+        playSound: true,
+        showWhen: true,
+        autoCancel: false,
+      );
+
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'default',
+        badgeNumber: 1,
+      );
+
+      const NotificationDetails details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+      await _notifications.show(777, '🔔 اختبار التشخيص', 'إذا رأيت هذا الإشعار، فكل شيء يعمل بشكل صحيح! ✅', details);
+
+      print('✅ Full notification test completed');
+      print('🎉 === انتهى التشخيص ===');
+    } catch (e) {
+      print('❌ Error during diagnosis: $e');
+      print('💡 === نصائح لحل المشكلة ===');
+      print('1. تأكد من تفعيل الإشعارات في إعدادات الجهاز');
+      print('2. تأكد من تفعيل الإشعارات للتطبيق');
+      print('3. تأكد من عدم وجود "Do Not Disturb"');
+      print('4. جرب إعادة تشغيل التطبيق');
+    }
+  }
+
+  // دالة اختبار سريعة للإشعارات
+  static Future<void> quickNotificationTest() async {
+    print('🚀 Quick notification test...');
+
+    try {
+      // إشعار فوري بسيط
+      await _notifications.show(
+        12345,
+        '🔔 اختبار سريع',
+        'إذا رأيت هذا الإشعار، فالإشعارات تعمل!',
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'quick_test',
+            'اختبار سريع',
+            importance: Importance.max,
+            priority: Priority.max,
+          ),
+          iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
+        ),
+      );
+      print('✅ Quick test notification sent');
+    } catch (e) {
+      print('❌ Quick test failed: $e');
+    }
   }
 }

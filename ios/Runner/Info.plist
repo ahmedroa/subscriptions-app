@@ -49,5 +49,14 @@
 		<false/>
 		<key>NSUserNotificationsUsageDescription</key>
 		<string>هذا التطبيق يحتاج إلى الإشعارات لتذكيرك بمواعيد الاشتراكات</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>background-processing</string>
+			<string>remote-notification</string>
+		</array>
+		<key>UIRequiredDeviceCapabilities</key>
+		<array>
+			<string>armv7</string>
+		</array>
 	</dict>
 </plist>

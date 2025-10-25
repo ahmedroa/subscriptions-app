@@ -66,6 +66,30 @@ class HomePage extends StatelessWidget {
             tooltip: 'اختبار الإشعارات',
           ),
           IconButton(
+            icon: const Icon(Icons.bug_report),
+            onPressed: () async {
+              try {
+                await NotificationService.diagnoseNotificationIssues();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('تم تشخيص الإشعارات - تحقق من Console'),
+                    backgroundColor: Colors.blue,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('خطأ في التشخيص: $e'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              }
+            },
+            tooltip: 'تشخيص الإشعارات',
+          ),
+          IconButton(
             icon: const Icon(Icons.notification_important),
             onPressed: () async {
               try {
@@ -93,25 +117,25 @@ class HomePage extends StatelessWidget {
             icon: const Icon(Icons.flash_on),
             onPressed: () async {
               try {
-                await NotificationService.showImmediateNotification();
+                await NotificationService.quickNotificationTest();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('تم إرسال إشعار فوري'),
-                    backgroundColor: Colors.purple,
+                    content: Text('تم إرسال اختبار سريع - تحقق من الإشعارات'),
+                    backgroundColor: Colors.orange,
                     duration: Duration(seconds: 2),
                   ),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('خطأ في الإشعار الفوري: $e'),
+                    content: Text('خطأ في الاختبار السريع: $e'),
                     backgroundColor: Colors.red,
                     duration: const Duration(seconds: 3),
                   ),
                 );
               }
             },
-            tooltip: 'إشعار فوري',
+            tooltip: 'اختبار سريع',
           ),
           IconButton(
             icon: const Icon(Icons.settings_applications),
