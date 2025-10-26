@@ -6,7 +6,6 @@ import 'package:subscriptions_app/home/logic/state.dart';
 import 'package:subscriptions_app/home/ui/screen/add_subscription_page.dart';
 import 'package:subscriptions_app/home/ui/screen/subscriptions_list_page.dart';
 import 'package:subscriptions_app/home/ui/screen/settings_page.dart';
-import 'package:subscriptions_app/settings/ui/screen/settings_page.dart' as notification_settings;
 import 'package:subscriptions_app/home/ui/widgets/summary_card.dart';
 import 'package:subscriptions_app/core/widgets/empty_state_widget.dart';
 import 'package:subscriptions_app/home/ui/widgets/subscriptions_list_widget.dart';
@@ -41,16 +40,7 @@ class HomePage extends StatelessWidget {
               const PopupMenuItem(value: 'name', child: Text('ترتيب حسب الاسم')),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.schedule),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const notification_settings.SettingsPage()),
-              );
-            },
-            tooltip: 'إعدادات وقت التذكيرات',
-          ),
+
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
@@ -87,7 +77,6 @@ class HomePage extends StatelessWidget {
                   return true;
                 }
               } else {
-                // اشتراك جديد لم يكن موجود
                 return true;
               }
             }

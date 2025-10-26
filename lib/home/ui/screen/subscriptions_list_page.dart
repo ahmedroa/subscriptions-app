@@ -6,6 +6,8 @@ import 'package:subscriptions_app/home/logic/cubit.dart';
 import 'package:subscriptions_app/home/logic/state.dart';
 import 'package:subscriptions_app/home/model/subscription_model.dart';
 import 'package:subscriptions_app/core/theme/color.dart';
+import 'package:subscriptions_app/home/ui/screen/add_subscription_page.dart';
+import 'package:subscriptions_app/core/utils/payment_utils.dart';
 
 class SubscriptionsListPage extends StatefulWidget {
   const SubscriptionsListPage({super.key});
@@ -86,7 +88,12 @@ class _SubscriptionsListPageState extends State<SubscriptionsListPage> {
                   );
                 } else if (state is SubscriptionsLoaded) {
                   final filteredSubscriptions = _filterSubscriptions(state.subscriptions);
-                  return _buildSubscriptionsList(filteredSubscriptions);
+                  return Column(
+                    children: [
+                      _buildStatsSection(filteredSubscriptions),
+                      Expanded(child: _buildSubscriptionsList(filteredSubscriptions)),
+                    ],
+                  );
                 }
                 return const SizedBox.shrink();
               },
@@ -226,6 +233,109 @@ class _SubscriptionsListPageState extends State<SubscriptionsListPage> {
     return filtered;
   }
 
+  Widget _buildStatsSection(List<SubscriptionModel> subscriptions) {
+    final total = subscriptions.fold<double>(0.0, (sum, sub) => sum + sub.amount);
+    final paidCount = subscriptions.where((sub) => sub.isPaid).length;
+    final unpaidCount = subscriptions.length - paidCount;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: const Color(0xFF6366F1).withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'إجمالي الاشتراكات المعروضة',
+                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Text(
+                  key: ValueKey(subscriptions.length),
+                  '${subscriptions.length}',
+                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.attach_money,
+                  label: 'المبلغ الإجمالي',
+                  value: '${total.toStringAsFixed(0)} ر.س',
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.check_circle,
+                  label: 'مدفوع',
+                  value: '$paidCount',
+                  color: Colors.green.shade300,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.pending,
+                  label: 'غير مدفوع',
+                  value: '$unpaidCount',
+                  color: Colors.orange,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({required IconData icon, required String label, required String value, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 11),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text(
+              key: ValueKey(value),
+              value,
+              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSubscriptionsList(List<SubscriptionModel> subscriptions) {
     if (subscriptions.isEmpty) {
       return Center(
@@ -256,11 +366,35 @@ class _SubscriptionsListPageState extends State<SubscriptionsListPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: subscriptions.length,
       itemBuilder: (context, index) {
         final subscription = subscriptions[index];
-        return SubscriptionCard(subscription: subscription, onTap: () {}, onPaymentTap: () {});
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: SubscriptionCard(
+            key: ValueKey(subscription.id),
+            subscription: subscription,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddSubscriptionPage(subscription: subscription)),
+              );
+            },
+            onPaymentTap: () {
+              PaymentUtils.showPaymentConfirmation(context, subscription);
+            },
+          ),
+        );
       },
     );
   }
