@@ -6,10 +6,10 @@ import 'package:subscriptions_app/home/logic/state.dart';
 import 'package:subscriptions_app/home/ui/screen/add_subscription_page.dart';
 import 'package:subscriptions_app/home/ui/screen/subscriptions_list_page.dart';
 import 'package:subscriptions_app/home/ui/screen/settings_page.dart';
+import 'package:subscriptions_app/settings/ui/screen/settings_page.dart' as notification_settings;
 import 'package:subscriptions_app/home/ui/widgets/summary_card.dart';
 import 'package:subscriptions_app/core/widgets/empty_state_widget.dart';
 import 'package:subscriptions_app/home/ui/widgets/subscriptions_list_widget.dart';
-import 'package:subscriptions_app/core/services/notification_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -42,196 +42,14 @@ class HomePage extends StatelessWidget {
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () async {
-              try {
-                await NotificationService.showTestNotification();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم إرسال إشعار تجريبي - تحقق من الإشعارات'),
-                    backgroundColor: Colors.green,
-                    duration: Duration(seconds: 3),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في الإشعارات: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 5),
-                  ),
-                );
-              }
+            icon: const Icon(Icons.schedule),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const notification_settings.SettingsPage()),
+              );
             },
-            tooltip: 'اختبار الإشعارات',
-          ),
-          IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: () async {
-              try {
-                await NotificationService.diagnoseNotificationIssues();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم تشخيص الإشعارات - تحقق من Console'),
-                    backgroundColor: Colors.blue,
-                    duration: Duration(seconds: 3),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في التشخيص: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 5),
-                  ),
-                );
-              }
-            },
-            tooltip: 'تشخيص الإشعارات',
-          ),
-          IconButton(
-            icon: const Icon(Icons.notification_important),
-            onPressed: () async {
-              try {
-                await NotificationService.showSimpleNotification();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم إرسال إشعار بسيط'),
-                    backgroundColor: Colors.blue,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في الإشعار البسيط: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            tooltip: 'إشعار بسيط',
-          ),
-          IconButton(
-            icon: const Icon(Icons.flash_on),
-            onPressed: () async {
-              try {
-                await NotificationService.quickNotificationTest();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم إرسال اختبار سريع - تحقق من الإشعارات'),
-                    backgroundColor: Colors.orange,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في الاختبار السريع: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            tooltip: 'اختبار سريع',
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_applications),
-            onPressed: () async {
-              try {
-                await NotificationService.checkSystemSettings();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم فحص إعدادات النظام - تحقق من الكونسول'),
-                    backgroundColor: Colors.orange,
-                    duration: Duration(seconds: 3),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في فحص النظام: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            tooltip: 'فحص النظام',
-          ),
-          IconButton(
-            icon: const Icon(Icons.info),
-            onPressed: () async {
-              try {
-                await NotificationService.showBasicNotification();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم إرسال إشعار أساسي'),
-                    backgroundColor: Colors.teal,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في الإشعار الأساسي: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            tooltip: 'إشعار أساسي',
-          ),
-          IconButton(
-            icon: const Icon(Icons.minimize),
-            onPressed: () async {
-              try {
-                await NotificationService.showMinimalNotification();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم إرسال إشعار بسيط'),
-                    backgroundColor: Colors.indigo,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في الإشعار البسيط: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            tooltip: 'إشعار بسيط',
-          ),
-          IconButton(
-            icon: const Icon(Icons.code),
-            onPressed: () async {
-              try {
-                await NotificationService.showRawNotification();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم إرسال إشعار خام'),
-                    backgroundColor: Colors.brown,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('خطأ في الإشعار الخام: $e'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            tooltip: 'إشعار خام',
+            tooltip: 'إعدادات وقت التذكيرات',
           ),
           IconButton(
             icon: const Icon(Icons.settings),

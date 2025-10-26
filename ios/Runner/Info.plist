@@ -49,10 +49,13 @@
 		<false/>
 		<key>NSUserNotificationsUsageDescription</key>
 		<string>هذا التطبيق يحتاج إلى الإشعارات لتذكيرك بمواعيد الاشتراكات</string>
+		<key>NSLocalNotificationsUsageDescription</key>
+		<string>هذا التطبيق يحتاج إلى الإشعارات المحلية لتذكيرك بمواعيد الاشتراكات</string>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>background-processing</string>
 			<string>remote-notification</string>
+			<string>background-fetch</string>
 		</array>
 		<key>UIRequiredDeviceCapabilities</key>
 		<array>

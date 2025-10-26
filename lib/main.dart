@@ -9,8 +9,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:subscriptions_app/core/services/notification_service.dart';
 import 'package:subscriptions_app/core/services/notification_log_service.dart';
 import 'package:subscriptions_app/core/ui/splash_screen.dart';
-import 'package:subscriptions_app/onboarding/onboarding_page.dart';
-import 'package:subscriptions_app/home/ui/screen/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -25,6 +23,14 @@ void main() async {
 
   await NotificationService.initialize();
   await NotificationService.requestPermissions();
+
+  // تعيين وقت التذكيرات الافتراضي إلى 8:28 صباحاً
+  final prefs = await SharedPreferences.getInstance();
+  if (!prefs.containsKey('notification_hour')) {
+    await prefs.setInt('notification_hour', 8); // 8 AM
+    await prefs.setInt('notification_minute', 28); // 28 دقيقة
+    print('✅ تم تعيين وقت التذكيرات الافتراضي إلى 8:28 صباحاً');
+  }
 
   await _clearAllHiveData();
 

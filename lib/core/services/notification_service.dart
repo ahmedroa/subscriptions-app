@@ -15,6 +15,10 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+      requestCriticalPermission: false,
+      defaultPresentAlert: true,
+      defaultPresentBadge: true,
+      defaultPresentSound: true,
     );
 
     const InitializationSettings settings = InitializationSettings(android: androidSettings, iOS: iosSettings);
@@ -52,11 +56,14 @@ class NotificationService {
   static Future<void> scheduleSubscriptionReminder(SubscriptionModel subscription) async {
     // الحصول على وقت التنبيه من الإعدادات
     final prefs = await SharedPreferences.getInstance();
-    final notificationHour = prefs.getInt('notification_hour') ?? 20; // 8 PM افتراضي
-    final notificationMinute = prefs.getInt('notification_minute') ?? 0;
+    final notificationHour = prefs.getInt('notification_hour') ?? 8; // 8 AM افتراضي
+    final notificationMinute = prefs.getInt('notification_minute') ?? 28; // 28 دقيقة
 
-    // تنبيه قبل الموعد
+    // تنبيه قبل الموعد (حسب إعدادات المستخدم)
     final reminderDate = subscription.nextPaymentDate.subtract(Duration(days: subscription.reminderDays));
+
+    // تنبيه في آخر يوم قبل الموعد (يوم واحد قبل)
+    final lastDayReminderDate = subscription.nextPaymentDate.subtract(Duration(days: 1));
 
     // تنبيه في يوم الموعد نفسه
     final dueDate = subscription.nextPaymentDate;
@@ -88,18 +95,27 @@ class NotificationService {
         notificationMinute,
       );
 
+      print('📅 Scheduling reminder for: ${reminderDateTime.toString()}');
+      print('📅 Reminder date: ${reminderDate.toString()}');
+      print('📅 Reminder days: ${subscription.reminderDays}');
+
       final reminderTitle = 'تذكير بالاشتراك';
       final reminderBody =
           'اشتراك ${subscription.serviceName} يستحق خلال ${subscription.reminderDays} ${subscription.reminderDays == 1 ? 'يوم' : 'أيام'}';
 
-      await _notifications.zonedSchedule(
-        subscription.id.hashCode, // استخدام hash كـ ID فريد
-        reminderTitle,
-        reminderBody,
-        _convertToTZDateTime(reminderDateTime),
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      );
+      try {
+        await _notifications.zonedSchedule(
+          subscription.id.hashCode, // استخدام hash كـ ID فريد
+          reminderTitle,
+          reminderBody,
+          _convertToTZDateTime(reminderDateTime),
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+        print('✅ Reminder notification scheduled successfully');
+      } catch (e) {
+        print('❌ Error scheduling reminder: $e');
+      }
 
       // حفظ الإشعار في السجل
       final reminderNotification = NotificationModel(
@@ -116,21 +132,77 @@ class NotificationService {
       await NotificationLogService.addNotification(reminderNotification);
     }
 
+    // جدولة التنبيه في آخر يوم قبل الموعد (إذا لم يكن في الماضي)
+    final lastDayReminderDateTime = DateTime(
+      lastDayReminderDate.year,
+      lastDayReminderDate.month,
+      lastDayReminderDate.day,
+      notificationHour,
+      notificationMinute,
+    );
+
+    if (lastDayReminderDateTime.isAfter(DateTime.now())) {
+      print('📅 Scheduling last day reminder for: ${lastDayReminderDateTime.toString()}');
+      print('📅 Last day reminder date: ${lastDayReminderDate.toString()}');
+
+      final lastDayTitle = 'تذكير أخير';
+      final lastDayBody =
+          'اشتراك ${subscription.serviceName} يستحق غداً - ${subscription.amount.toStringAsFixed(0)} ريال';
+
+      try {
+        await _notifications.zonedSchedule(
+          subscription.id.hashCode + 2, // استخدام ID مختلف للتنبيه الثالث
+          lastDayTitle,
+          lastDayBody,
+          _convertToTZDateTime(lastDayReminderDateTime),
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+        print('✅ Last day reminder notification scheduled successfully');
+      } catch (e) {
+        print('❌ Error scheduling last day reminder: $e');
+      }
+
+      // حفظ الإشعار في السجل
+      final lastDayNotification = NotificationModel(
+        id: '${subscription.id}_last_day_${lastDayReminderDateTime.millisecondsSinceEpoch}',
+        subscriptionId: subscription.id,
+        subscriptionName: subscription.serviceName,
+        title: lastDayTitle,
+        body: lastDayBody,
+        sentDate: DateTime.now(),
+        scheduledDate: lastDayReminderDateTime,
+        isRead: false,
+        type: 'last_day_reminder',
+      );
+
+      await NotificationLogService.addNotification(lastDayNotification);
+      print('✅ Last day reminder notification scheduled for: ${lastDayReminderDateTime.toString()}');
+    }
+
     // جدولة التنبيه في يوم الموعد نفسه
     if (dueDate.isAfter(DateTime.now())) {
       final dueDateTime = DateTime(dueDate.year, dueDate.month, dueDate.day, notificationHour, notificationMinute);
 
+      print('📅 Scheduling due date reminder for: ${dueDateTime.toString()}');
+      print('📅 Due date: ${dueDate.toString()}');
+
       final dueTitle = 'موعد الدفع';
       final dueBody = 'اشتراك ${subscription.serviceName} يستحق اليوم - ${subscription.amount.toStringAsFixed(0)} ريال';
 
-      await _notifications.zonedSchedule(
-        subscription.id.hashCode + 1, // استخدام ID مختلف للتنبيه الثاني
-        dueTitle,
-        dueBody,
-        _convertToTZDateTime(dueDateTime),
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      );
+      try {
+        await _notifications.zonedSchedule(
+          subscription.id.hashCode + 1, // استخدام ID مختلف للتنبيه الثاني
+          dueTitle,
+          dueBody,
+          _convertToTZDateTime(dueDateTime),
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+        print('✅ Due date reminder notification scheduled successfully');
+      } catch (e) {
+        print('❌ Error scheduling due date reminder: $e');
+      }
 
       // حفظ الإشعار في السجل
       final dueNotification = NotificationModel(
@@ -206,105 +278,6 @@ class NotificationService {
     return true;
   }
 
-  static Future<void> showTestNotification() async {
-    print('🔔 Starting test notification...');
-
-    try {
-      // طلب الصلاحيات أولاً
-      print('🔐 Requesting permissions...');
-      await requestPermissions();
-      print('✅ Permissions requested');
-
-      // التحقق من حالة الإشعارات
-      final isEnabled = await areNotificationsEnabled();
-      print('📱 Notifications enabled: $isEnabled');
-
-      if (!isEnabled) {
-        print('❌ Notifications are disabled!');
-        return;
-      }
-
-      // إنشاء قناة إشعارات لـ Android
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'test_channel',
-        'اختبار الإشعارات',
-        channelDescription: 'قناة اختبار الإشعارات',
-        importance: Importance.max,
-        priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
-        enableVibration: true,
-        playSound: true,
-        showWhen: true,
-        when: null,
-      );
-
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        sound: 'default',
-        badgeNumber: 1,
-      );
-
-      const NotificationDetails details = NotificationDetails(android: androidDetails, iOS: iosDetails);
-
-      // إظهار الإشعار فوراً
-      print('📤 Sending notification...');
-      await _notifications.show(
-        999, // ID فريد للاختبار
-        '🔔 اختبار الإشعارات',
-        'إذا رأيت هذا الإشعار، فالإشعارات تعمل بشكل صحيح! ✅',
-        details,
-      );
-
-      print('✅ Test notification sent successfully');
-    } catch (e) {
-      print('❌ Error sending test notification: $e');
-    }
-  }
-
-  static Future<void> showSimpleNotification() async {
-    print('Showing simple notification...');
-
-    // محاولة إرسال إشعار بدون طلب صلاحيات إضافية
-    await _notifications.show(
-      1000,
-      'اختبار بسيط',
-      'هذا إشعار بسيط للاختبار',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'simple_channel',
-          'إشعارات بسيطة',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
-      ),
-    );
-    print('Simple notification sent');
-  }
-
-  static Future<void> showImmediateNotification() async {
-    print('Showing immediate notification...');
-
-    // إشعار فوري بدون أي تعقيدات
-    await _notifications.show(
-      2000,
-      'إشعار فوري',
-      'إذا رأيت هذا، فالإشعارات تعمل!',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'immediate_channel',
-          'إشعارات فورية',
-          importance: Importance.max,
-          priority: Priority.max,
-        ),
-        iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
-      ),
-    );
-    print('Immediate notification sent');
-  }
-
   static Future<void> checkSystemSettings() async {
     print('Checking system settings...');
 
@@ -342,53 +315,17 @@ class NotificationService {
     }
   }
 
-  static Future<void> showBasicNotification() async {
-    print('Showing basic notification...');
-
-    // إشعار أساسي جداً
-    await _notifications.show(
-      3000,
-      'اختبار أساسي',
-      'إشعار أساسي',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'basic_channel',
-          'إشعارات أساسية',
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-    );
-    print('Basic notification sent');
-  }
-
-  static Future<void> showMinimalNotification() async {
-    print('Showing minimal notification...');
-
-    // إشعار بسيط جداً
-    await _notifications.show(
-      4000,
-      'اختبار',
-      'اختبار',
-      const NotificationDetails(
-        android: AndroidNotificationDetails('minimal_channel', 'إشعارات بسيطة'),
-        iOS: DarwinNotificationDetails(),
-      ),
-    );
-    print('Minimal notification sent');
-  }
-
-  static Future<void> showRawNotification() async {
-    print('Showing raw notification...');
-
-    // إشعار خام بدون أي إعدادات
-    await _notifications.show(5000, 'RAW', 'RAW TEST', const NotificationDetails());
-    print('Raw notification sent');
-  }
-
   static tz.TZDateTime _convertToTZDateTime(DateTime dateTime) {
-    return tz.TZDateTime.from(dateTime, tz.getLocation('Asia/Riyadh'));
+    try {
+      final location = tz.getLocation('Asia/Riyadh');
+      final tzDateTime = tz.TZDateTime.from(dateTime, location);
+      print('🕐 Converted DateTime: ${dateTime.toString()} -> ${tzDateTime.toString()}');
+      return tzDateTime;
+    } catch (e) {
+      print('❌ Error converting DateTime: $e');
+      // Fallback to local timezone
+      return tz.TZDateTime.from(dateTime, tz.local);
+    }
   }
 
   // دالة تشخيص شاملة لحل مشاكل الإشعارات
@@ -464,32 +401,6 @@ class NotificationService {
       print('2. تأكد من تفعيل الإشعارات للتطبيق');
       print('3. تأكد من عدم وجود "Do Not Disturb"');
       print('4. جرب إعادة تشغيل التطبيق');
-    }
-  }
-
-  // دالة اختبار سريعة للإشعارات
-  static Future<void> quickNotificationTest() async {
-    print('🚀 Quick notification test...');
-
-    try {
-      // إشعار فوري بسيط
-      await _notifications.show(
-        12345,
-        '🔔 اختبار سريع',
-        'إذا رأيت هذا الإشعار، فالإشعارات تعمل!',
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'quick_test',
-            'اختبار سريع',
-            importance: Importance.max,
-            priority: Priority.max,
-          ),
-          iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
-        ),
-      );
-      print('✅ Quick test notification sent');
-    } catch (e) {
-      print('❌ Quick test failed: $e');
     }
   }
 }
