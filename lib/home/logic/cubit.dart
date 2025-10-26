@@ -14,18 +14,44 @@ class SubscriptionsCubit extends Cubit<SubscriptionsState> {
       emit(SubscriptionsLoading());
       final subscriptions = await repository.getSubscriptions();
 
-      // Sort by nearest next payment date
-      subscriptions.sort((a, b) => a.nextPaymentDate.compareTo(b.nextPaymentDate));
+      // تحديث حالة isPaid تلقائياً: إذا اقترب موعد الدفع، نرجع isPaid = false
+      bool needsUpdate = false;
+      for (var sub in subscriptions) {
+        if (sub.isPaid && sub.daysRemaining <= 7) {
+          final updatedSub = sub.copyWith(isPaid: false);
+          await repository.updateSubscription(updatedSub);
+          needsUpdate = true;
+        }
+      }
 
-      final total = subscriptions.fold<double>(0.0, (sum, sub) => sum + sub.amount);
-
-      // إعادة جدولة جميع التنبيهات
-      await NotificationService.rescheduleAllReminders(subscriptions);
-
-      emit(SubscriptionsLoaded(subscriptions: subscriptions, totalMonthly: total));
+      // إذا تم التحديث، نعيد تحميل البيانات
+      if (needsUpdate) {
+        final updatedSubscriptions = await repository.getSubscriptions();
+        _sortSubscriptionsByPriority(updatedSubscriptions);
+        final total = updatedSubscriptions.fold<double>(0.0, (sum, sub) => sum + sub.amount);
+        await NotificationService.rescheduleAllReminders(updatedSubscriptions);
+        emit(SubscriptionsLoaded(subscriptions: updatedSubscriptions, totalMonthly: total));
+      } else {
+        _sortSubscriptionsByPriority(subscriptions);
+        final total = subscriptions.fold<double>(0.0, (sum, sub) => sum + sub.amount);
+        await NotificationService.rescheduleAllReminders(subscriptions);
+        emit(SubscriptionsLoaded(subscriptions: subscriptions, totalMonthly: total));
+      }
     } catch (e) {
       emit(SubscriptionsError('فشل تحميل الاشتراكات'));
     }
+  }
+
+  // ترتيب الاشتراكات: غير المدفوعة أولاً (حسب القرب من موعد الدفع)، ثم المدفوعة
+  void _sortSubscriptionsByPriority(List<SubscriptionModel> subscriptions) {
+    subscriptions.sort((a, b) {
+      // الاشتراكات غير المدفوعة تظهر أولاً
+      if (!a.isPaid && b.isPaid) return -1;
+      if (a.isPaid && !b.isPaid) return 1;
+
+      // ضمن نفس الفئة، الترتيب حسب تاريخ الدفع (الأقرب أولاً)
+      return a.nextPaymentDate.compareTo(b.nextPaymentDate);
+    });
   }
 
   Future<void> addSubscription(SubscriptionModel subscription) async {
@@ -80,7 +106,10 @@ class SubscriptionsCubit extends Cubit<SubscriptionsState> {
         current.microsecond,
       );
 
-      final updatedSubscription = subscription.copyWith(nextPaymentDate: newPaymentDate);
+      final updatedSubscription = subscription.copyWith(
+        nextPaymentDate: newPaymentDate,
+        isPaid: true, // نضع علامة "تم الدفع" مؤقتاً
+      );
 
       await repository.updateSubscription(updatedSubscription);
       await NotificationService.cancelSubscriptionReminder(subscription.id);
@@ -93,8 +122,8 @@ class SubscriptionsCubit extends Cubit<SubscriptionsState> {
           return sub.id == subscription.id ? updatedSubscription : sub;
         }).toList();
 
-        // ترتيب الاشتراكات حسب التاريخ
-        updatedSubscriptions.sort((a, b) => a.nextPaymentDate.compareTo(b.nextPaymentDate));
+        // ترتيب الاشتراكات: غير المدفوعة أولاً، ثم المدفوعة
+        _sortSubscriptionsByPriority(updatedSubscriptions);
 
         // حساب المجموع الجديد
         final total = updatedSubscriptions.fold<double>(0.0, (sum, sub) => sum + sub.amount);

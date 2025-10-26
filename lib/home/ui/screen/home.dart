@@ -62,7 +62,9 @@ class HomePage extends StatelessWidget {
       ),
       body: BlocBuilder<SubscriptionsCubit, SubscriptionsState>(
         buildWhen: (previous, current) {
+          // دائماً نحدث إذا تغير نوع الـ state
           if (previous.runtimeType != current.runtimeType) return true;
+
           if (current is SubscriptionsLoaded && previous is SubscriptionsLoaded) {
             // تحديث عند تغيير عدد الاشتراكات أو المجموع
             if (previous.subscriptions.length != current.subscriptions.length ||
@@ -70,17 +72,37 @@ class HomePage extends StatelessWidget {
               return true;
             }
 
-            // تحديث عند تغيير تفاصيل الاشتراكات (مثل مواعيد الدفع)
-            for (int i = 0; i < current.subscriptions.length; i++) {
-              if (i < previous.subscriptions.length) {
-                final prevSub = previous.subscriptions[i];
-                final currSub = current.subscriptions[i];
-                if (prevSub.id == currSub.id &&
-                    (prevSub.nextPaymentDate != currSub.nextPaymentDate || prevSub.isPaid != currSub.isPaid)) {
+            // إنشاء خريطة للاشتراكات السابقة حسب ID للمقارنة الصحيحة
+            final previousMap = {for (var sub in previous.subscriptions) sub.id: sub};
+
+            // تحديث عند تغيير أي تفاصيل في الاشتراكات
+            for (var currentSub in current.subscriptions) {
+              final prevSub = previousMap[currentSub.id];
+              if (prevSub != null) {
+                // تحقق من تغيير التاريخ أو حالة الدفع أو المبلغ
+                if (prevSub.nextPaymentDate != currentSub.nextPaymentDate ||
+                    prevSub.isPaid != currentSub.isPaid ||
+                    prevSub.amount != currentSub.amount ||
+                    prevSub.serviceName != currentSub.serviceName) {
                   return true;
+                }
+              } else {
+                // اشتراك جديد لم يكن موجود
+                return true;
+              }
+            }
+
+            // تحديث إذا تغير ترتيب الاشتراكات (مهم جداً!)
+            if (previous.subscriptions.length == current.subscriptions.length) {
+              for (int i = 0; i < current.subscriptions.length; i++) {
+                if (current.subscriptions[i].id != previous.subscriptions[i].id) {
+                  return true; // الترتيب تغير
                 }
               }
             }
+
+            // لا يوجد تغيير
+            return false;
           }
 
           return false;

@@ -10,11 +10,24 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DateTime now = DateTime.now();
-    final List<SubscriptionModel> upcomingPayments =
+    final DateTime currentMonthStart = DateTime(now.year, now.month, 1);
+    final DateTime currentMonthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+
+    // تصفية الاشتراكات في الشهر الحالي فقط
+    final List<SubscriptionModel> currentMonthSubscriptions = subscriptions.where((sub) {
+      return sub.nextPaymentDate.isAfter(currentMonthStart.subtract(const Duration(seconds: 1))) &&
+          sub.nextPaymentDate.isBefore(currentMonthEnd.add(const Duration(seconds: 1)));
+    }).toList();
+
+    // حساب إجمالي مصروفات الشهر الحالي
+    final double currentMonthTotal = currentMonthSubscriptions.fold<double>(0.0, (sum, sub) => sum + sub.amount);
+
+    // الدفعة القادمة من جميع الاشتراكات (ليس فقط الشهر الحالي)
+    final List<SubscriptionModel> allUpcomingPayments =
         subscriptions.where((SubscriptionModel sub) => sub.nextPaymentDate.isAfter(now)).toList()
           ..sort((SubscriptionModel a, SubscriptionModel b) => a.nextPaymentDate.compareTo(b.nextPaymentDate));
 
-    final SubscriptionModel? nextPayment = upcomingPayments.isNotEmpty ? upcomingPayments.first : null;
+    final SubscriptionModel? nextPayment = allUpcomingPayments.isNotEmpty ? allUpcomingPayments.first : null;
     final double nextPaymentAmount = nextPayment?.amount ?? 0.0;
     final int nextPaymentDays = nextPayment != null ? nextPayment.daysRemaining : 0;
 
@@ -44,24 +57,45 @@ class SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'إجمالي المصروفات الشهرية',
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'مصروفات هذا الشهر',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                _getMonthName(now.month),
+                style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
-          Text(
-            '${totalMonthly.toStringAsFixed(0)} ريال',
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          const SizedBox(height: 8),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: Text(
+              key: ValueKey(currentMonthTotal),
+              '${currentMonthTotal.toStringAsFixed(0)} ريال',
+              style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(height: 20),
-
-          const SizedBox(height: 16),
           Row(
             children: <Widget>[
               Expanded(
                 child: _StatItem(
                   icon: Icons.payment,
                   title: 'الدفعة القادمة',
-                  value: '${nextPaymentAmount.toStringAsFixed(0)} ر.س',
+                  value: nextPaymentAmount > 0 ? '${nextPaymentAmount.toStringAsFixed(0)} ر.س' : 'لا يوجد',
                   color: Colors.white,
                 ),
               ),
@@ -70,17 +104,20 @@ class SummaryCard extends StatelessWidget {
                 child: _StatItem(
                   icon: Icons.schedule,
                   title: 'متبقي',
-                  value: nextPaymentDays > 0 ? '$nextPaymentDays ${nextPaymentDays == 1 ? 'يوم' : 'أيام'}' : 'اليوم',
-                  color: nextPaymentDays <= 3 ? Colors.orange : Colors.white,
+                  value: nextPaymentDays > 0
+                      ? '$nextPaymentDays ${nextPaymentDays == 1 ? 'يوم' : 'أيام'}'
+                      : nextPaymentAmount > 0
+                      ? 'اليوم'
+                      : '-',
+                  color: nextPaymentDays <= 3 && nextPaymentDays > 0 ? Colors.orange : Colors.white,
                 ),
               ),
               const SizedBox(width: 12),
-
               Expanded(
                 child: _StatItem(
                   icon: Icons.subscriptions,
                   title: 'عدد الاشتراكات',
-                  value: '${subscriptions.length}',
+                  value: '${currentMonthSubscriptions.length}',
                   color: Colors.white,
                 ),
               ),
@@ -89,6 +126,24 @@ class SummaryCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
+    return months[month - 1];
   }
 }
 
@@ -102,7 +157,8 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
@@ -119,10 +175,20 @@ class _StatItem extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(scale: animation, child: child),
+              );
+            },
+            child: Text(
+              key: ValueKey(value),
+              value,
+              style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),
