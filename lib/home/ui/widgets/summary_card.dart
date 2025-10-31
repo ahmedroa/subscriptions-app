@@ -61,7 +61,7 @@ class SummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'مصروفات هذا الشهر',
+                'مستحقات هذا الشهر',
                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
@@ -117,7 +117,7 @@ class SummaryCard extends StatelessWidget {
                 child: _StatItem(
                   icon: Icons.subscriptions,
                   title: 'عدد الاشتراكات',
-                  value: '${currentMonthSubscriptions.length}',
+                  value: _getSubscriptionsText(subscriptions.length),
                   color: Colors.white,
                 ),
               ),
@@ -144,6 +144,20 @@ class SummaryCard extends StatelessWidget {
       'ديسمبر',
     ];
     return months[month - 1];
+  }
+
+  String _getSubscriptionsText(int count) {
+    if (count == 0) {
+      return 'لا يوجد';
+    } else if (count == 1) {
+      return 'اشتراك واحد';
+    } else if (count == 2) {
+      return 'اشتراكان';
+    } else if (count >= 3 && count <= 10) {
+      return '$count اشتراكات';
+    } else {
+      return '$count اشتراك';
+    }
   }
 }
 

@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:subscriptions_app/core/theme/color.dart';
 import 'package:subscriptions_app/home/logic/cubit.dart';
 import 'package:subscriptions_app/home/logic/state.dart';
+import 'package:subscriptions_app/home/model/subscription_model.dart';
 import 'package:subscriptions_app/home/ui/screen/add_subscription_page.dart';
-import 'package:subscriptions_app/home/ui/screen/subscriptions_list_page.dart';
-import 'package:subscriptions_app/home/ui/screen/settings_page.dart';
+import 'package:subscriptions_app/home/ui/widgets/subscriptions_list_widget.dart';
 import 'package:subscriptions_app/home/ui/widgets/summary_card.dart';
 import 'package:subscriptions_app/core/widgets/empty_state_widget.dart';
-import 'package:subscriptions_app/home/ui/widgets/subscriptions_list_widget.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -93,29 +92,7 @@ class HomePage extends StatelessWidget {
           }
 
           if (state is SubscriptionsLoaded) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SummaryCard(subscriptions: state.subscriptions, totalMonthly: state.totalMonthly),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: const Text(
-                    'الاشتراكات القادمة',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Expanded(
-                  child: state.subscriptions.isEmpty
-                      ? EmptyStateWidget(
-                          title: 'لا توجد اشتراكات حالياً',
-                          subtitle: 'اضغط على الزر أدناه لإضافة اشتراك جديد',
-                          icon: Icons.subscriptions_outlined,
-                        )
-                      : SubscriptionsListWidget(subscriptions: state.subscriptions),
-                ),
-              ],
-            );
+            return _AnimatedHomeContent(subscriptions: state.subscriptions, totalMonthly: state.totalMonthly);
           }
 
           return const SizedBox();
@@ -146,5 +123,115 @@ class HomePage extends StatelessWidget {
         cubit.sortSubscriptions('name');
         break;
     }
+  }
+}
+
+class _AnimatedHomeContent extends StatefulWidget {
+  final List<SubscriptionModel> subscriptions;
+  final double totalMonthly;
+
+  const _AnimatedHomeContent({required this.subscriptions, required this.totalMonthly});
+
+  @override
+  State<_AnimatedHomeContent> createState() => _AnimatedHomeContentState();
+}
+
+class _AnimatedHomeContentState extends State<_AnimatedHomeContent> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _summaryAnimation;
+  late Animation<double> _titleAnimation;
+  late Animation<double> _listAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
+
+    _summaryAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.5, curve: Curves.easeInOut),
+    );
+
+    _titleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.4, 0.7, curve: Curves.easeInOut),
+    );
+
+    _listAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.6, 1.0, curve: Curves.easeInOut),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(_AnimatedHomeContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.subscriptions.length != oldWidget.subscriptions.length ||
+        widget.totalMonthly != oldWidget.totalMonthly) {
+      _controller.reset();
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        FadeTransition(
+          opacity: _summaryAnimation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -0.15),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: _summaryAnimation, curve: Curves.easeInOut)),
+            child: SummaryCard(subscriptions: widget.subscriptions, totalMonthly: widget.totalMonthly),
+          ),
+        ),
+        FadeTransition(
+          opacity: _titleAnimation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: _titleAnimation, curve: Curves.easeInOut)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: const Text(
+                'الاشتراكات القادمة',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: FadeTransition(
+            opacity: _listAnimation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.1),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(parent: _listAnimation, curve: Curves.easeInOut)),
+              child: widget.subscriptions.isEmpty
+                  ? EmptyStateWidget(
+                      title: 'لا توجد اشتراكات حالياً',
+                      subtitle: 'اضغط على الزر أدناه لإضافة اشتراك جديد',
+                      icon: Icons.subscriptions_outlined,
+                    )
+                  : SubscriptionsListWidget(subscriptions: widget.subscriptions),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

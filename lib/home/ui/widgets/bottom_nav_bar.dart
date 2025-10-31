@@ -3,7 +3,6 @@ import 'package:subscriptions_app/core/theme/color.dart';
 import 'package:subscriptions_app/home/ui/screen/add_subscription_page.dart';
 import 'package:subscriptions_app/home/ui/screen/home.dart';
 import 'package:subscriptions_app/home/ui/screen/settings_page.dart';
-import 'package:subscriptions_app/home/ui/screen/subscriptions_list_page.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -21,23 +20,18 @@ class _BottomNavBarState extends State<BottomNavBar> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    _pages = [const HomePage(), const SubscriptionsListPage(), const SettingsPage()];
-    
+    _pages = [const HomePage(), const SettingsPage()];
+
     // إنشاء animation controllers لكل زر
     _controllers = List.generate(
       3,
-      (index) => AnimationController(
-        duration: const Duration(milliseconds: 200),
-        vsync: this,
-      ),
+      (index) => AnimationController(duration: const Duration(milliseconds: 200), vsync: this),
     );
-    
+
     _scaleAnimations = _controllers.map((controller) {
-      return Tween<double>(begin: 1.0, end: 0.9).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-      );
+      return Tween<double>(begin: 1.0, end: 0.9).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     }).toList();
-    
+
     // تشغيل animation للزر المحدد
     _controllers[0].forward();
   }
@@ -52,7 +46,7 @@ class _BottomNavBarState extends State<BottomNavBar> with TickerProviderStateMix
 
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
-    
+
     setState(() {
       _controllers[_selectedIndex].reverse();
       _selectedIndex = index;
@@ -74,30 +68,21 @@ class _BottomNavBarState extends State<BottomNavBar> with TickerProviderStateMix
                 backgroundColor: const Color(0xFF6366F1),
                 elevation: 8,
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AddSubscriptionPage()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AddSubscriptionPage()));
                 },
                 icon: const Icon(Icons.add, color: Colors.white),
-                label: const Text('إضافة اشتراك', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: const Text(
+                  'إضافة اشتراك',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               )
             : const SizedBox.shrink(),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: ColorsManager.containerColorDark,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
+          borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, -5))],
         ),
         child: SafeArea(
           child: Container(
@@ -106,8 +91,8 @@ class _BottomNavBarState extends State<BottomNavBar> with TickerProviderStateMix
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.home_outlined, Icons.home, 'الرئيسية', 0),
-                _buildNavItem(1, Icons.list_alt_outlined, Icons.list_alt, 'الاشتراكات', 1),
-                _buildNavItem(2, Icons.settings_outlined, Icons.settings, 'الإعدادات', 2),
+                // _buildNavItem(1, Icons.list_alt_outlined, Icons.list_alt, 'الاشتراكات', 1),
+                _buildNavItem(1, Icons.settings_outlined, Icons.settings, 'الإعدادات', 1),
               ],
             ),
           ),
@@ -116,16 +101,9 @@ class _BottomNavBarState extends State<BottomNavBar> with TickerProviderStateMix
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
-        child: IndexedStack(
-          key: ValueKey(_selectedIndex),
-          index: _selectedIndex,
-          children: _pages,
-        ),
+        child: IndexedStack(key: ValueKey(_selectedIndex), index: _selectedIndex, children: _pages),
       ),
     );
   }
