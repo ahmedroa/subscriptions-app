@@ -187,7 +187,7 @@ class _SubscriptionCardState extends State<SubscriptionCard> with SingleTickerPr
                         AnimatedDefaultTextStyle(
                           duration: const Duration(milliseconds: 300),
                           style: TextStyle(color: accentColor, fontWeight: FontWeight.w600, fontSize: 14),
-                          child: Text('${widget.subscription.amount.toStringAsFixed(2)} ريال'),
+                          child: Text('${widget.subscription.amount.toStringAsFixed(0)} ريال'),
                         ),
                         const SizedBox(height: 4),
                         Text(

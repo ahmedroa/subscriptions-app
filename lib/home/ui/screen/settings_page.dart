@@ -6,6 +6,7 @@ import 'package:subscriptions_app/home/logic/state.dart';
 import 'package:subscriptions_app/core/services/notification_service.dart';
 import 'package:subscriptions_app/core/theme/color.dart';
 import 'package:subscriptions_app/home/ui/widgets/notification_log_page.dart';
+import 'package:subscriptions_app/home/ui/screen/privacy_policy_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -102,10 +103,12 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             Image.asset('icon/logo.png', width: 24, height: 24),
             const SizedBox(width: 8),
-            const Text('الإعدادات'),
+            const Text('الإعدادات', style: TextStyle(color: Colors.white)),
           ],
         ),
         backgroundColor: ColorsManager.backgroundColor,
+        iconTheme: const IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -315,6 +318,34 @@ class _SettingsPageState extends State<SettingsPage> {
                           style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyPage()));
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: ColorsManager.backgroundColor,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3), width: 1.5),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.privacy_tip, color: Color(0xFF6366F1)),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              'سياسة الخصوصية',
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios, color: Color(0xFF6366F1), size: 16),
+                        ],
+                      ),
                     ),
                   ),
                 ],

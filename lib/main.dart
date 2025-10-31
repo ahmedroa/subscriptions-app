@@ -9,7 +9,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:subscriptions_app/core/services/notification_service.dart';
 import 'package:subscriptions_app/core/services/notification_log_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:subscriptions_app/home/ui/screen/home.dart';
+import 'package:subscriptions_app/home/ui/widgets/bottom_nav_bar.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
         ],
         supportedLocales: const [Locale('ar', 'SA'), Locale('en', 'US')],
         // home: const OnboardingPage(),
-        home: const HomePage(),
+        home: const BottomNavBar(),
       ),
     );
   }

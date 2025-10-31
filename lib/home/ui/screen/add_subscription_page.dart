@@ -1,9 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:subscriptions_app/core/widgets/app_text_form_field.dart';
 import 'package:subscriptions_app/home/logic/cubit.dart';
 import 'package:subscriptions_app/home/model/subscription_model.dart';
 import 'package:subscriptions_app/core/theme/color.dart';
+
+class ArabicToEnglishNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    String newText = _convertArabicToEnglish(newValue.text);
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
+    );
+  }
+
+  String _convertArabicToEnglish(String input) {
+    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    String result = input;
+    for (int i = 0; i < arabicNumbers.length; i++) {
+      result = result.replaceAll(arabicNumbers[i], englishNumbers[i]);
+    }
+    return result;
+  }
+}
 
 class AddSubscriptionPage extends StatefulWidget {
   final SubscriptionModel? subscription;
@@ -80,6 +103,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
             AppTextFormField(
               controller: _amountController,
               hintText: 'المبلغ',
+              keyboardType: TextInputType.number,
+              inputFormatters: [ArabicToEnglishNumberFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'الرجاء إدخال المبلغ';
@@ -93,9 +118,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               controller: _notesController,
               hintText: 'ملاحظات (اختياري)',
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'الرجاء إدخال الملاحظات';
-                }
                 return null;
               },
             ),
@@ -169,28 +191,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: ColorsManager.containerColorDark,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextFormField(
-                controller: _notesController,
-                // style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'ملاحظات (اختياري)',
-                  labelStyle: const TextStyle(color: Colors.white),
-                  hintText: 'مثال: تغيير طريقة الدفع',
-                  hintStyle: const TextStyle(color: Colors.white70),
-                  prefixIcon: const Icon(Icons.note, color: Colors.blue),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  filled: true,
-                  fillColor: Colors.transparent,
-                ),
-                maxLines: 3,
-              ),
-            ),
+
             const SizedBox(height: 24),
             Container(
               decoration: BoxDecoration(

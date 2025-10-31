@@ -22,13 +22,6 @@ class HomePage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text('ذكّرني', style: TextStyle(color: Colors.white)),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.list),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionsListPage()));
-            },
-            tooltip: 'عرض جميع الاشتراكات',
-          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
             onSelected: (value) {
@@ -39,14 +32,6 @@ class HomePage extends StatelessWidget {
               const PopupMenuItem(value: 'amount', child: Text('ترتيب حسب المبلغ')),
               const PopupMenuItem(value: 'name', child: Text('ترتيب حسب الاسم')),
             ],
-          ),
-
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-            },
-            tooltip: 'الإعدادات',
           ),
         ],
       ),

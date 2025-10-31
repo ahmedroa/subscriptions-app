@@ -48,6 +48,8 @@ class _SubscriptionsListPageState extends State<SubscriptionsListPage> {
     return Scaffold(
       backgroundColor: ColorsManager.backgroundColor,
       appBar: AppBar(
+        backgroundColor: ColorsManager.backgroundColor,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Row(
           children: [
             Image.asset('icon/logo.png', width: 24, height: 24),
@@ -55,8 +57,7 @@ class _SubscriptionsListPageState extends State<SubscriptionsListPage> {
             const Text('جميع الاشتراكات', style: TextStyle(color: Colors.white)),
           ],
         ),
-        backgroundColor: ColorsManager.backgroundColor,
-        iconTheme: const IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
