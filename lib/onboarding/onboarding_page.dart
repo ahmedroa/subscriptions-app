@@ -16,7 +16,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   final List<OnboardingData> _onboardingData = [
     OnboardingData(
-      title: 'مرحباً بك في ذكّرني',
+      title: 'مرحباً بك في اشتراكاتي',
       description: 'تطبيق ذكي لإدارة جميع اشتراكاتك الشهرية وعدم نسيان مواعيد الدفع',
       icon: Icons.subscriptions,
       color: const Color(0xFF6366F1),

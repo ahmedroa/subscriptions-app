@@ -5,7 +5,6 @@ import 'package:subscriptions_app/home/logic/cubit.dart';
 import 'package:subscriptions_app/home/logic/state.dart';
 import 'package:subscriptions_app/core/services/notification_service.dart';
 import 'package:subscriptions_app/core/theme/color.dart';
-import 'package:subscriptions_app/home/ui/widgets/notification_log_page.dart';
 import 'package:subscriptions_app/home/ui/screen/privacy_policy_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -99,13 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: ColorsManager.backgroundColor,
       appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset('icon/logo.png', width: 24, height: 24),
-            const SizedBox(width: 8),
-            const Text('الإعدادات', style: TextStyle(color: Colors.white)),
-          ],
-        ),
+        title: const Text('الإعدادات', style: TextStyle(color: Colors.white)),
         backgroundColor: ColorsManager.backgroundColor,
         iconTheme: const IconThemeData(color: Colors.white),
         automaticallyImplyLeading: false,
@@ -121,19 +114,6 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.notifications, color: Colors.white),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'إعدادات التنبيهات',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // وقت التنبيه
                   InkWell(
                     onTap: _selectNotificationTime,
                     borderRadius: BorderRadius.circular(8),
@@ -145,7 +125,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.access_time, color: Colors.blue),
+                          const Icon(Icons.access_time, color: Color(0xFF6366F1)),
                           const SizedBox(width: 16),
                           const Expanded(
                             child: Column(
@@ -160,164 +140,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           Text(
                             _formatTime(_notificationTime),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF6366F1)),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+                          Icon(Icons.arrow_forward_ios, color: Color(0xFF6366F1), size: 16),
                         ],
                       ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // سجل الإشعارات
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationLogPage()));
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: ColorsManager.backgroundColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.history, color: Colors.blue),
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'سجل الإشعارات',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
-                                ),
-                                Text(
-                                  'عرض جميع الإشعارات المرسلة',
-                                  style: TextStyle(fontSize: 12, color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // معلومات إضافية
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline, color: Colors.blue, size: 20),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'سيتم إرسال التنبيهات في هذا الوقت لكل اشتراك حسب موعد الاستحقاق',
-                            style: TextStyle(color: Colors.white70, fontSize: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // قسم المعلومات
-          Container(
-            decoration: BoxDecoration(color: ColorsManager.containerColorDark, borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.info, color: Colors.white),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'معلومات التطبيق',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.backgroundColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.apps, color: Colors.blue),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Text('اسم التطبيق', style: TextStyle(color: Colors.white, fontSize: 16)),
-                        ),
-                        Text(
-                          'ذكّرني',
-                          style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.backgroundColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.code, color: Colors.blue),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Text('الإصدار', style: TextStyle(color: Colors.white, fontSize: 16)),
-                        ),
-                        Text(
-                          '1.0.0',
-                          style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: ColorsManager.backgroundColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.developer_mode, color: Colors.blue),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Text('المطور', style: TextStyle(color: Colors.white, fontSize: 16)),
-                        ),
-                        Text(
-                          'فريق التطوير',
-                          style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -327,11 +155,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: ColorsManager.backgroundColor,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3), width: 1.5),
                       ),
                       child: const Row(
                         children: [
@@ -352,6 +179,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
+
+          const SizedBox(height: 20),
         ],
       ),
     );

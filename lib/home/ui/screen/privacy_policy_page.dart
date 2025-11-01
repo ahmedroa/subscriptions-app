@@ -12,7 +12,7 @@ class PrivacyPolicyPage extends StatelessWidget {
         backgroundColor: ColorsManager.backgroundColor,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          'سياسة الخصوصية',
+          'Privacy Policy',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -21,149 +21,55 @@ class PrivacyPolicyPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: ColorsManager.containerColorDark,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3), width: 1.5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'سياسة الخصوصية',
-                    style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'تطبيق ذكّرني - Zakerni App',
-                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
-                  ),
-                  const SizedBox(height: 12),
-                  Divider(color: Colors.white.withOpacity(0.2)),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Text('آخر تحديث:', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
-                      const SizedBox(width: 8),
-                      Text(
-                        '26 أكتوبر 2024',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
             // جمع البيانات
-            _buildSectionNumber(1),
-            _buildSectionTitle('جمع البيانات'),
+            _buildSectionTitle('Data Collection'),
             _buildParagraph(
-              'تطبيق "ذكّرني" لا يجمع أي بيانات شخصية. جميع البيانات المدخلة في التطبيق (أسماء الاشتراكات، المبالغ، التواريخ، الملاحظات) تُحفظ محلياً على جهاز المستخدم فقط ولا يتم إرسالها لأي خوادم خارجية.',
+              'The "Ashtrakati" app does not collect any personal data. All data entered in the app (subscription names, amounts, dates, notes) is stored locally on the user\'s device only and is not sent to any external servers.',
             ),
 
             const SizedBox(height: 32),
 
             // التخزين
-            _buildSectionNumber(2),
-            _buildSectionTitle('التخزين والأمان'),
+            _buildSectionTitle('Storage and Security'),
             _buildParagraph(
-              'جميع البيانات تُخزن على الجهاز فقط باستخدام التخزين المحلي. لا يتم نقل أو مشاركة هذه البيانات مع أي طرف ثالث. التطبيق يعمل بشكل كامل دون اتصال بالإنترنت.',
+              'All data is stored on the device only using local storage. This data is not transferred or shared with any third party. The app works completely offline without an internet connection.',
             ),
 
             const SizedBox(height: 32),
 
             // الأذونات
-            _buildSectionNumber(3),
-            _buildSectionTitle('الأذونات'),
+            _buildSectionTitle('Permissions'),
             _buildParagraph(
-              'التطبيق يطلب أذونات الإشعارات فقط لإرسال تذكيرات بمواعيد الدفع. لا يتم طلب أي أذونات أخرى مثل الموقع، الكاميرا، أو جهات الاتصال.',
+              'The app only requests notification permissions to send payment date reminders. No other permissions such as location, camera, or contacts are requested.',
             ),
 
             const SizedBox(height: 32),
 
             // الخدمات الخارجية
-            _buildSectionNumber(4),
-            _buildSectionTitle('الخدمات الخارجية'),
+            _buildSectionTitle('External Services'),
             _buildParagraph(
-              'التطبيق لا يستخدم أي خدمات تحليلات (Analytics)، إعلانات، أو خدمات سحابية خارجية. لا يتم جمع أو مشاركة أي بيانات مع أطراف ثالثة.',
+              'The app does not use any analytics services, advertisements, or external cloud services. No data is collected or shared with third parties.',
             ),
 
             const SizedBox(height: 32),
 
             // حذف البيانات
-            _buildSectionNumber(5),
-            _buildSectionTitle('حذف البيانات'),
+            _buildSectionTitle('Data Deletion'),
             _buildParagraph(
-              'يمكن للمستخدم حذف جميع بياناته في أي وقت من خلال حذف التطبيق من الجهاز. عند حذف التطبيق، يتم حذف جميع البيانات نهائياً.',
+              'Users can delete all their data at any time by uninstalling the app from their device. When the app is deleted, all data is permanently removed.',
+            ),
+
+            const SizedBox(height: 32),
+            _buildSectionTitle('Policy Updates'),
+            _buildParagraph(
+              'This policy may be updated from time to time. We recommend reviewing this page periodically.',
             ),
 
             const SizedBox(height: 32),
 
-            // التغييرات
-            _buildSectionNumber(6),
-            _buildSectionTitle('تحديثات السياسة'),
-            _buildParagraph('قد يتم تحديث هذه السياسة من وقت لآخر. يُنصح بمراجعة هذه الصفحة بشكل دوري.'),
-
-            const SizedBox(height: 32),
-
-            // الاتصال
-            _buildSectionNumber(7),
-            _buildSectionTitle('الاتصال'),
-            _buildParagraph('للاستفسارات حول سياسة الخصوصية:'),
-            Container(
-              margin: const EdgeInsets.only(top: 12, left: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: ColorsManager.containerColorDark,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('البريد الإلكتروني:', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
-                  const SizedBox(height: 4),
-                  Text(
-                    '[بريدك الإلكتروني]',
-                    style: const TextStyle(color: Color(0xFF6366F1), fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-
+       
             const SizedBox(height: 40),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionNumber(int number) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Text(
-          '$number',
-          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
     );

@@ -19,7 +19,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: ColorsManager.backgroundColor,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text('ذكّرني', style: TextStyle(color: Colors.white)),
+        title: Text('اشتراكاتي', style: TextStyle(color: Colors.white)),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
@@ -65,16 +65,14 @@ class HomePage extends StatelessWidget {
               }
             }
 
-            // تحديث إذا تغير ترتيب الاشتراكات (مهم جداً!)
             if (previous.subscriptions.length == current.subscriptions.length) {
               for (int i = 0; i < current.subscriptions.length; i++) {
                 if (current.subscriptions[i].id != previous.subscriptions[i].id) {
-                  return true; // الترتيب تغير
+                  return true;
                 }
               }
             }
 
-            // لا يوجد تغيير
             return false;
           }
 

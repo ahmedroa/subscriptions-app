@@ -24,12 +24,12 @@ void main() async {
   await NotificationService.initialize();
   await NotificationService.requestPermissions();
 
-  // تعيين وقت التذكيرات الافتراضي إلى 8:28 صباحاً
+  // تعيين وقت التذكيرات الافتراضي إلى 8:00 مساءً
   final prefs = await SharedPreferences.getInstance();
   if (!prefs.containsKey('notification_hour')) {
-    await prefs.setInt('notification_hour', 8); // 8 AM
-    await prefs.setInt('notification_minute', 28); // 28 دقيقة
-    print('✅ تم تعيين وقت التذكيرات الافتراضي إلى 8:28 صباحاً');
+    await prefs.setInt('notification_hour', 20); // 8 PM (8 مساءً)
+    await prefs.setInt('notification_minute', 0); // 0 دقيقة
+    print('✅ تم تعيين وقت التذكيرات الافتراضي إلى 8:00 مساءً');
   }
 
   await _clearAllHiveData();
@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => SubscriptionsCubit(repository)..loadSubscriptions(),
       child: MaterialApp(
-        title: 'ذكّرني',
+        title: 'اشتراكاتي',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.blue, scaffoldBackgroundColor: Colors.grey[50], fontFamily: 'Cairo'),
         locale: const Locale('ar', 'SA'),
@@ -84,5 +84,14 @@ class MyApp extends StatelessWidget {
         home: const BottomNavBar(),
       ),
     );
+  }
+}
+
+class MyWidget extends StatelessWidget {
+  const MyWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(body: Center(child: Image.asset('icon/logo.png')));
   }
 }
